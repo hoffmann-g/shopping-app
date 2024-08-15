@@ -25,6 +25,7 @@ public class Cart {
     private Long discountedPrice;
     private String coupon;
     
+    @Builder.Default
     private List<CartItem> productList = new ArrayList<>();
     
     public Cart(Long customerId){

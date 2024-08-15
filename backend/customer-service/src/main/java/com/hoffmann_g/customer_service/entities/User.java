@@ -46,6 +46,7 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     private Address billingAddress;
     
+    @Builder.Default
     private List<Long> favoriteProducts = new ArrayList<>();
 
 }

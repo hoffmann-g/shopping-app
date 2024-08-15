@@ -11,16 +11,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hoffmann_g.security_service.config.CustomerService;
+import com.hoffmann_g.security_service.controllers.exceptions.DatabaseMismatchException;
 import com.hoffmann_g.security_service.controllers.exceptions.InvalidArgumentException;
-import com.hoffmann_g.security_service.dtos.TokenResponse;
 import com.hoffmann_g.security_service.dtos.UserLoginRequest;
 import com.hoffmann_g.security_service.entities.UserLogin;
 import com.hoffmann_g.security_service.mappers.UserLoginMapper;
 
+@SuppressWarnings("unused")
 @Service
 public class AuthenticationService implements UserDetailsService {
 
     private final UserLoginService userLoginService;
+    
     private final CustomerService customerService;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
@@ -38,28 +40,28 @@ public class AuthenticationService implements UserDetailsService {
         this.userLoginMapper = userLoginMapper;
     }
 
-    public TokenResponse login(UserLoginRequest request) {
+    public String login(UserLoginRequest request) {
         //if (!customerService.existsByEmail(request.email()))
         //    throw new ResourceNotFoundException("Provided user login could not be found");
-
+ 
         /* 
         UserLogin userLogin = userLoginService.findByEmail(request.email()).orElseThrow(()
             -> new DatabaseMismatchException("Could not find existent user's login"));
 
-        if (!userLogin.equals(userLoginMapper.mapToUserLogin(request)))
+        if (!userLogin.getPassword().equals(request.password()))
             throw new InvalidArgumentException("Incorrect login credentials");
         */
-
+        
         var userPasswordToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
 
         Authentication auth = this.authenticationManager.authenticate(userPasswordToken);
 
-        return new TokenResponse(tokenService.generateToken((UserLogin) auth.getPrincipal()));
+        return tokenService.generateToken((UserLogin) auth.getPrincipal());
     }
 
     public UserLogin register(UserLoginRequest request) {
-        //if (userLoginService.existsByEmail(request.email()))
-        //    throw new InvalidArgumentException("User already registered");
+        //if (!customerService.existsByEmail(request.email()))
+        //    throw new ResourceNotFoundException("Provided user login could not be found");
 
         if (userLoginService.existsByEmail(request.email()))
             throw new InvalidArgumentException("Email already registered");
