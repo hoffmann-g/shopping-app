@@ -3,6 +3,8 @@ package com.hoffmann_g.security_service.services;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
@@ -38,14 +40,17 @@ public class TokenService {
         }
     }
 
-    public UserLogin validateToken(String token){
+    public UserDetails validateToken(String token){
         String email = JWT.require(algorithm)
                           .withIssuer("security-service")
                           .build()
                           .verify(token)
                           .getSubject();
 
-        return userLoginService.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Could not find user"));
+        return userLoginService.findByEmail(email).orElseThrow(()
+            -> new ResourceNotFoundException("Could not find user"));
+
+        
     }
 
     private Instant generateExpirationDate() {
