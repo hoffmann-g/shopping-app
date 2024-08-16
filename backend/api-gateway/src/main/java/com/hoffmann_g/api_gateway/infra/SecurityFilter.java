@@ -28,12 +28,13 @@ public class SecurityFilter implements WebFilter {
 
     private final WebClient webClient;
 
-    //@Value("${token-validation-gateway-secret}")
-    private String gatewaySecret;
-    private Algorithm gatewayAlgorithm = Algorithm.HMAC256(gatewaySecret); 
+    private Algorithm gatewayAlgorithm;
 
-    public SecurityFilter(WebClient.Builder webClientBuilder) {
+    public SecurityFilter(WebClient.Builder webClientBuilder,
+                          @Value("${token-validation-gateway-secret}")
+                          String gatewaySecret) {
         this.webClient = webClientBuilder.build();
+        this.gatewayAlgorithm = Algorithm.HMAC256(gatewaySecret);
     }
 
     @Override

@@ -15,21 +15,21 @@ import com.hoffmann_g.security_service.controllers.exceptions.AlgorithmGeneratio
 import com.hoffmann_g.security_service.controllers.exceptions.ResourceNotFoundException;
 import com.hoffmann_g.security_service.entities.UserLogin;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class TokenService {
     
     private final UserLoginService userLoginService;
 
-    //@Value("${token.validation.gateway.secret}")
-    private String gatewaySecret = "b";
-    //@Value("${token.generation.gateway.secret")
-    private String secret = "a";
+    private final Algorithm tokenAlgorithm;
+    private final Algorithm gatewayAlgorithm;
 
-    private final Algorithm tokenAlgorithm = Algorithm.HMAC256(secret);
-    private final Algorithm gatewayAlgorithm = Algorithm.HMAC256(gatewaySecret); 
+    public TokenService(@Value("${token.validation.gateway.secret}") String gatewaySecret,
+                        @Value("${token.generation.gateway.secret") String secret,
+                        UserLoginService userLoginService) {
+        this.userLoginService = userLoginService;
+        this.tokenAlgorithm = Algorithm.HMAC256(secret);
+        this.gatewayAlgorithm = Algorithm.HMAC256(gatewaySecret);        
+    }
 
     public String generateToken(UserLogin userLogin){
         try {
