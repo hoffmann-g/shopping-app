@@ -36,6 +36,11 @@ public class OrderController {
     public OrderResponse getOrder(@PathVariable Long id){
         return orderSerivce.getOrderById(id);
     }
+    
+    @GetMapping("/user/{id}")
+    public List<OrderResponse> getOrdersByUser(@PathVariable Long id){
+        return orderSerivce.getOrdersByUser(id);
+    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

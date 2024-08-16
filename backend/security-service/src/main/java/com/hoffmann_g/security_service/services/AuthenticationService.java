@@ -11,13 +11,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hoffmann_g.security_service.config.CustomerService;
-import com.hoffmann_g.security_service.controllers.exceptions.DatabaseMismatchException;
 import com.hoffmann_g.security_service.controllers.exceptions.InvalidArgumentException;
 import com.hoffmann_g.security_service.dtos.UserLoginRequest;
+import com.hoffmann_g.security_service.dtos.UserRegisterRequest;
+import com.hoffmann_g.security_service.dtos.UserRequest;
 import com.hoffmann_g.security_service.entities.UserLogin;
 import com.hoffmann_g.security_service.mappers.UserLoginMapper;
 
-@SuppressWarnings("unused")
+import jakarta.transaction.Transactional;
+
 @Service
 public class AuthenticationService implements UserDetailsService {
 
@@ -40,37 +42,29 @@ public class AuthenticationService implements UserDetailsService {
         this.userLoginMapper = userLoginMapper;
     }
 
+    @Transactional
     public String login(UserLoginRequest request) {
-        //if (!customerService.existsByEmail(request.email()))
-        //    throw new ResourceNotFoundException("Provided user login could not be found");
- 
-        /* 
-        UserLogin userLogin = userLoginService.findByEmail(request.email()).orElseThrow(()
-            -> new DatabaseMismatchException("Could not find existent user's login"));
-
-        if (!userLogin.getPassword().equals(request.password()))
-            throw new InvalidArgumentException("Incorrect login credentials");
-        */
+        if (!userLoginService.existsByEmail(request.email()))
+            throw new InvalidArgumentException("User not registered");    
         
         var userPasswordToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
-
         Authentication auth = this.authenticationManager.authenticate(userPasswordToken);
-
         return tokenService.generateToken((UserLogin) auth.getPrincipal());
     }
 
-    public UserLogin register(UserLoginRequest request) {
-        //if (!customerService.existsByEmail(request.email()))
-        //    throw new ResourceNotFoundException("Provided user login could not be found");
-
+    @Transactional
+    public String register(UserRegisterRequest request) {
         if (userLoginService.existsByEmail(request.email()))
             throw new InvalidArgumentException("Email already registered");
 
         UserLogin userLogin = userLoginMapper.mapToUserLogin(request);
-
         userLogin.setPassword(new BCryptPasswordEncoder().encode(request.password()));
+        userLoginService.save(userLogin);
 
-        return userLoginService.save(userLogin);
+        UserRequest user = userLoginMapper.mapToUser(request);
+        customerService.saveUser(user);
+
+        return "User successfulyl registed";
     }
 
     @Override

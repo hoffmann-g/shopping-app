@@ -13,7 +13,8 @@ import com.hoffmann_g.customer_service.dtos.UserRequest;
 import com.hoffmann_g.customer_service.dtos.UserResponse;
 import com.hoffmann_g.customer_service.services.UserService;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -41,15 +42,9 @@ public class UserController {
         return userService.findAll();
     }
 
-    @GetMapping()
-    @ResponseStatus(HttpStatus.OK)
-    public Boolean existsByEmail(@RequestBody @NotBlank String email) {
-        return userService.existsByEmail(email);
-    }
-
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse saveUser(@RequestBody UserRequest request) {
+    public UserResponse saveUser(@Valid @RequestBody UserRequest request) {
         return userService.save(request);
     }
     

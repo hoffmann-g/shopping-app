@@ -167,4 +167,8 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    public List<OrderResponse> getOrdersByUser(Long id) {
+        return orderRepository.findByCustomerId(id).stream().map(orderMapper::mapToOrderResponse).toList();
+    }
+
 }

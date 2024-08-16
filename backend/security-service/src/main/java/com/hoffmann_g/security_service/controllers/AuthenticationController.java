@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hoffmann_g.security_service.dtos.UserLoginRequest;
-import com.hoffmann_g.security_service.entities.UserLogin;
+import com.hoffmann_g.security_service.dtos.UserRegisterRequest;
 import com.hoffmann_g.security_service.services.AuthenticationService;
 import com.hoffmann_g.security_service.services.TokenService;
 
@@ -39,7 +39,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.OK)
-    public UserLogin register(@Valid @RequestBody UserLoginRequest request){
+    public String register(@Valid @RequestBody UserRegisterRequest request){
         return authenticationService.register(request);
     }
 
