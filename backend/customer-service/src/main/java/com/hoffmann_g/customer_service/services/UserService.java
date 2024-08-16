@@ -33,10 +33,6 @@ public class UserService {
         return userRepository.findAll().stream().map(userMapper::mapToUserResponse).toList();
     }
 
-    public boolean existsByEmail(String email){
-        return userRepository.existsByEmail(email);
-    }
-
     @Transactional
     public UserResponse save(UserRequest request) {
         return userMapper.mapToUserResponse(userRepository.save(userMapper.mapToUser(request)));
