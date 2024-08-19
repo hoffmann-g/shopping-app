@@ -1,13 +1,16 @@
 package com.hoffmann_g.order_service.entities;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.hoffmann_g.order_service.entities.enums.OrderStatus;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,7 +34,9 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true)
     private Long customerId;
+    @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
     private Long totalAmount;
     private Long shipmentCost;
@@ -40,6 +45,6 @@ public class Order {
     
     @Builder.Default
     @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderItem> orderItemList = Collections.emptyList();
+    private List<OrderItem> orderItemList = new ArrayList<>();
 
 }

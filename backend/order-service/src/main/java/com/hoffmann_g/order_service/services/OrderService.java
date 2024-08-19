@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,32 +24,23 @@ import com.hoffmann_g.order_service.entities.enums.OrderStatus;
 import com.hoffmann_g.order_service.mappers.OrderMapper;
 import com.hoffmann_g.order_service.repositories.OrderRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
-@Transactional
 public class OrderService {
 
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private CouponService couponService;
-
-    @Autowired
-    private StockService stockService;
-
-    @Autowired
-    private CartService cartService;
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private OrderMapper orderMapper;
+    private final ProductService productService;
+    private final CouponService couponService;
+    private final StockService stockService;
+    private final CartService cartService;
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
 
     @Transactional
-    public OrderResponse placeOrder(OrderRequest request) {
+    public OrderResponse placeOrder(Long userId, String userEmail, OrderRequest request) {
         // get cart items and quantities
-        Map<Long, Integer> productQuantities = cartService.getCartQuantities(request.customerId());
+        Map<Long, Integer> productQuantities = cartService.getCartQuantities(userId);
 
         if (productQuantities.size() < 1) throw new EmptyCartException("Cannot place order from an empty cart"); 
 
@@ -71,7 +61,7 @@ public class OrderService {
         Long totalPrice = calculateTotalPrice(prices, productQuantities);
 
         // get coupon if it exists
-        String coupon = cartService.getCartCoupon(request.customerId());
+        String coupon = cartService.getCartCoupon(userId);
 
         // if coupon exists, recalculates price
         if (coupon != null) {
@@ -88,7 +78,7 @@ public class OrderService {
         // create order
         Order order = new Order(
                 null,
-                request.customerId(),
+                userId,
                 OrderStatus.PENDING,
                 totalPrice,
                 shipmentCost,
@@ -103,7 +93,7 @@ public class OrderService {
         order = orderRepository.save(order);
 
         // clear cart
-        cartService.clearCart(request.customerId());
+        cartService.clearCart(userId);
 
         // send message to payment service to process payment passing the payment info
         // --- credit/debit card: card number, cvv, name, etc, amount

@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hoffmann_g.security_service.config.CustomerService;
@@ -29,17 +29,20 @@ public class AuthenticationService implements UserDetailsService {
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final UserLoginMapper userLoginMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthenticationService(UserLoginService userLoginService,
                                  CustomerService customerService,
                                  TokenService tokenService,
                                  @Lazy AuthenticationManager authenticationManager,
-                                 UserLoginMapper userLoginMapper){
+                                 UserLoginMapper userLoginMapper,
+                                 PasswordEncoder passwordEncoder){
         this.userLoginService = userLoginService;
         this.customerService = customerService;
         this.tokenService = tokenService;
         this.authenticationManager = authenticationManager;
         this.userLoginMapper = userLoginMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -57,12 +60,14 @@ public class AuthenticationService implements UserDetailsService {
         if (userLoginService.existsByEmail(request.email()))
             throw new InvalidArgumentException("Email already registered");
 
-        UserLogin userLogin = userLoginMapper.mapToUserLogin(request);
-        userLogin.setPassword(new BCryptPasswordEncoder().encode(request.password()));
-        userLoginService.save(userLogin);
-
         UserRequest user = userLoginMapper.mapToUser(request);
-        customerService.saveUser(user);
+        Long customerId = customerService.saveUser(user);
+
+        UserLogin userLogin = userLoginMapper.mapToUserLogin(request);
+        userLogin.setPassword(passwordEncoder.encode(request.password()));
+        userLogin.setCustomerId(customerId);
+
+        userLoginService.save(userLogin);
 
         return "User successfulyl registed";
     }

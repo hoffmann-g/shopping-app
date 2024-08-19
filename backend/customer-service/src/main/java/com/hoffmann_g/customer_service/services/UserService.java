@@ -33,8 +33,14 @@ public class UserService {
         return userRepository.findAll().stream().map(userMapper::mapToUserResponse).toList();
     }
 
+    public UserResponse findByEmail(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User could not be found"));
+        
+        return userMapper.mapToUserResponse(user);
+    }
+
     @Transactional
-    public UserResponse save(UserRequest request) {
-        return userMapper.mapToUserResponse(userRepository.save(userMapper.mapToUser(request)));
+    public Long save(UserRequest request) {
+        return userRepository.save(userMapper.mapToUser(request)).getId();
     }
 }

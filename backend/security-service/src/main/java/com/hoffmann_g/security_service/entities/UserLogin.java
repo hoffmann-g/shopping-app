@@ -28,6 +28,8 @@ public class UserLogin implements UserDetails{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
+    private Long customerId;
+    @Column(unique = true)
     private String email;
     private String password;
 

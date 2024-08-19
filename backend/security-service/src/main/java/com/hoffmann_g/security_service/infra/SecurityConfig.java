@@ -20,7 +20,8 @@ public class SecurityConfig {
 
                                 .requestMatchers(HttpMethod.POST, "/api/security/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/security/login").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/security/validate-token").permitAll()
+
+                                .requestMatchers(HttpMethod.GET, "/api/internal/**").permitAll()
 
                                 .anyRequest().denyAll()
                                 
