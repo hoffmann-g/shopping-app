@@ -16,6 +16,7 @@ import com.hoffmann_g.order_service.dtos.OrderRequest;
 import com.hoffmann_g.order_service.dtos.OrderResponse;
 import com.hoffmann_g.order_service.services.OrderService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,7 @@ public class OrderPublicController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public OrderResponse placeOrder(@RequestHeader("Authorization") String encodedToken, @Valid @RequestBody OrderRequest request){
         return orderSerivce.placeOrder(securityService.getUserId(encodedToken),
                                        securityService.getUserEmail(encodedToken),
@@ -38,6 +40,10 @@ public class OrderPublicController {
     @GetMapping
     public List<OrderResponse> getMyOrders(@RequestHeader("Authorization") String encodedToken){
         return orderSerivce.getOrdersByUser(securityService.getUserId(encodedToken));
+    }
+
+    public String fallbackMethod(String encodedToken, OrderRequest request, Throwable throwable) {
+        return "Oops! Something went wrong";
     }
 
 }

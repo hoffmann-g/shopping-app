@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hoffmann_g.cart_service.dtos.CartResponse;
 import com.hoffmann_g.cart_service.services.CartService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,26 +26,34 @@ public class CartInternalController {
 
     @GetMapping("/{customer-id}")
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public CartResponse getCart(@PathVariable(value = "customer-id") Long customerId) {
         return cartService.getCart(customerId);
     }
 
     @GetMapping("/{customer-id}/coupon")
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public String getCartCoupon(@PathVariable(value = "customer-id") Long customerId) {
         return cartService.getCartCoupon(customerId);
     }
 
     @GetMapping("/{customer-id}/quantities")
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public Map<Long, Integer> getCartQuantities(@PathVariable(value = "customer-id") Long customerId) {
         return cartService.getCartQuantities(customerId);
     }
 
     @DeleteMapping("/{customer-id}")
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public CartResponse clearCart(@PathVariable(value = "customer-id") Long customerId) {
         return cartService.clearCart(customerId);
+    }
+
+    public String fallbackMethod(Long customerId, Throwable throwable) {
+        return "Oops! Something went wrong";
     }
 
 }
