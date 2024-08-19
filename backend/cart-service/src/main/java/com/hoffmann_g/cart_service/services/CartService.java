@@ -135,13 +135,12 @@ public class CartService {
         if (cart.getProductList().isEmpty()) {
             cart.setTotalPrice(0L);
             cart.setDiscountedPrice(0L);
+            cart.setCoupon(null);
             return;
         }
 
         List<Long> productsIds = cart.getProductList().stream().map(CartItem::getProductId).toList();
         Map<Long, Long> priceCatalog = productService.getPrices(productsIds);
-
-        
 
         Long totalPrice = 0L;
 

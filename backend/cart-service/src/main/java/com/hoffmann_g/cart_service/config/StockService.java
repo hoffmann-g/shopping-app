@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "stock-service")
 public interface StockService {
     
-    @RequestMapping(method = RequestMethod.GET, value = "/api/stock/verify/product")
+    @RequestMapping(method = RequestMethod.GET, value = "/api/internal/stock/verify/product")
     public Boolean isProductInStock(@RequestParam("productId") Long productId, @RequestParam("quantity") Integer quantity);
     
 }

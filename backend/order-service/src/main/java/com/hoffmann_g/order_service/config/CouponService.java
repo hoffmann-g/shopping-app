@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient(name = "coupon-service")
 public interface CouponService {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/api/coupon/{couponCode}/discount")
+    @RequestMapping(method = RequestMethod.GET, value = "/api/internal/coupon/{couponCode}/discount")
     Integer getCouponDiscount(@PathVariable("couponCode") String couponCode);
 
 }
