@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "product-service")
 public interface ProductService {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/api/product/prices")
+    @RequestMapping(method = RequestMethod.GET, value = "/api/internal/product/prices")
     public Map<Long, Long> getPrices(@RequestParam List<Long> productIds);
     
 }

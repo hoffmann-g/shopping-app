@@ -14,21 +14,17 @@ import com.hoffmann_g.customer_service.dtos.UserResponse;
 import com.hoffmann_g.customer_service.services.UserService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/user")
-public class UserController {
+@RequestMapping("/api/internal/user")
+public class UserInternalController {
 
-    private UserService userService;
-
-    public UserController(UserService userService){
-        this.userService = userService;
-    }
+    private final UserService userService;
     
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -44,7 +40,7 @@ public class UserController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse saveUser(@Valid @RequestBody UserRequest request) {
+    public Long saveUser(@Valid @RequestBody UserRequest request) {
         return userService.save(request);
     }
     

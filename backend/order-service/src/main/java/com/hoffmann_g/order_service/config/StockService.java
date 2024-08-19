@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "stock-service")
 public interface StockService {
 
-    @RequestMapping(method = RequestMethod.GET, value = "api/stock/verify/cart")
+    @RequestMapping(method = RequestMethod.GET, value = "api/internal/stock/verify/cart")
     public List<Long> isCartInStock(@RequestParam Map<String, String> items);
 
-    @RequestMapping(method = RequestMethod.PUT, value = "api/stock/reserve")
+    @RequestMapping(method = RequestMethod.PUT, value = "api/internal/stock/reserve")
     public void reserveStock(@RequestParam Map<String, String> stockItems);
 
     

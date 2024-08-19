@@ -3,6 +3,7 @@ package com.hoffmann_g.customer_service.dtos;
 import java.util.Date;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record UserRequest(
 
@@ -21,7 +22,7 @@ public record UserRequest(
     @NotBlank(message = "Phone number cannot be blank")
     String phoneNumber,
     
-    @NotBlank(message = "Birth date cannot be blank")
+    @NotNull(message = "Birth date cannot be blank")
     Date dob
 ) {
 

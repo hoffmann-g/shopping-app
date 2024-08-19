@@ -9,7 +9,7 @@ import com.hoffmann_g.security_service.dtos.UserRequest;
 @FeignClient(name = "customer-service")
 public interface CustomerService {
 
-    @RequestMapping(method = RequestMethod.POST, value = "api/user")
-    public void saveUser(@RequestBody UserRequest request);
+    @RequestMapping(method = RequestMethod.POST, value = "api/internal/user")
+    public Long saveUser(@RequestBody UserRequest request);
 
 }

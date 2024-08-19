@@ -3,10 +3,9 @@ package com.hoffmann_g.security_service.services;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -19,16 +18,13 @@ import com.hoffmann_g.security_service.entities.UserLogin;
 public class TokenService {
     
     private final UserLoginService userLoginService;
-
     private final Algorithm tokenAlgorithm;
-    private final Algorithm gatewayAlgorithm;
 
-    public TokenService(@Value("${token.validation.gateway.secret}") String gatewaySecret,
-                        @Value("${token.generation.gateway.secret") String secret,
-                        UserLoginService userLoginService) {
+    public TokenService(UserLoginService userLoginService,
+                        @Value("${token.generation.secret") String secret) { 
         this.userLoginService = userLoginService;
         this.tokenAlgorithm = Algorithm.HMAC256(secret);
-        this.gatewayAlgorithm = Algorithm.HMAC256(gatewaySecret);        
+    
     }
 
     public String generateToken(UserLogin userLogin){
@@ -44,31 +40,32 @@ public class TokenService {
         }
     }
 
-    public String validateToken(String token){
+    @Transactional(readOnly = true)
+    public Long validateTokenId(String token){
         String email = JWT.require(tokenAlgorithm)
                           .withIssuer("security-service")
                           .build()
-                          .verify(token)
+                          .verify(token.replace("Bearer ", ""))
                           .getSubject();
 
-        UserDetails userLogin = userLoginService.findByEmail(email).orElseThrow(()
+        UserLogin userLogin = userLoginService.findByEmail(email).orElseThrow(()
             -> new ResourceNotFoundException("Could not find user"));
 
-        return encryptUserLogin(userLogin); 
+        return userLogin.getCustomerId();
     }
 
-    private String encryptUserLogin(UserDetails userLogin){
-        try {
-            return JWT.create()
-                              .withIssuer("security-service")
-                              .withSubject(userLogin.getUsername())
-                              .withClaim("authorities", userLogin.getAuthorities().stream().map(x -> x.toString()).toList())
-                              .withExpiresAt(generateExpirationDate(120L))
-                              .sign(gatewayAlgorithm);
-                              
-        } catch (JWTCreationException e){
-            throw new AlgorithmGenerationException(e.getMessage());
-        }
+    @Transactional(readOnly = true)
+    public String validateTokenEmail(String token){
+        String email = JWT.require(tokenAlgorithm)
+                          .withIssuer("security-service")
+                          .build()
+                          .verify(token.replace("Bearer ", ""))
+                          .getSubject();
+
+        UserLogin userLogin = userLoginService.findByEmail(email).orElseThrow(()
+            -> new ResourceNotFoundException("Could not find user"));
+
+        return userLogin.getEmail();
     }
 
     private Instant generateExpirationDate(Long minutes) {

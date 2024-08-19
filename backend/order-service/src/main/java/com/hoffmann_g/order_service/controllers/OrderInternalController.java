@@ -2,33 +2,28 @@ package com.hoffmann_g.order_service.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hoffmann_g.order_service.dtos.OrderRequest;
 import com.hoffmann_g.order_service.dtos.OrderResponse;
 import com.hoffmann_g.order_service.services.OrderService;
 
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("api/order")
-public class OrderController {
+@RequestMapping("api/internal/order")
+public class OrderInternalController {
 
-    @Autowired
-    private OrderService orderSerivce;
+    private final OrderService orderSerivce;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse placeOrder(@Valid @RequestBody OrderRequest request){
-        return orderSerivce.placeOrder(request);
+    @GetMapping("/user/{id}")
+    public List<OrderResponse> getOrdersByUser(@PathVariable Long id){
+        return orderSerivce.getOrdersByUser(id);
     }
 
     @GetMapping("/{id}")
@@ -37,11 +32,6 @@ public class OrderController {
         return orderSerivce.getOrderById(id);
     }
     
-    @GetMapping("/user/{id}")
-    public List<OrderResponse> getOrdersByUser(@PathVariable Long id){
-        return orderSerivce.getOrdersByUser(id);
-    }
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<OrderResponse> getOrders(){

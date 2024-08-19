@@ -11,7 +11,5 @@ import com.hoffmann_g.customer_service.entities.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String document);
-    
-    Boolean existsByEmail(String document);
         
 }
