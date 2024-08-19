@@ -21,18 +21,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
-
 @RestController
-@RequestMapping("api/coupon")
-public class CouponController {
-    
+@RequestMapping("api/internal/coupon")
+public class CouponInternalController {
+
     @Autowired
     private CouponService couponService;
 
     @GetMapping("/{code}/discount")
     @ResponseStatus(HttpStatus.OK)
-    public Integer getCouponDiscount(@PathVariable String code){
+    public Integer getCouponDiscount(@PathVariable String code) {
         return couponService.getCouponDiscount(code);
     }
 
@@ -49,7 +47,8 @@ public class CouponController {
     }
 
     @DeleteMapping("/{code}")
-    public void deleteCoupon(@PathVariable String code){
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteCoupon(@PathVariable String code) {
         couponService.deleteCoupon(code);
     }
 
@@ -59,8 +58,8 @@ public class CouponController {
     }
 
     @GetMapping("/{code}")
-    public CouponResponse getCoupon(@PathVariable String code){
+    public CouponResponse getCoupon(@PathVariable String code) {
         return couponService.getCoupon(code);
     }
-    
-}  
+
+}

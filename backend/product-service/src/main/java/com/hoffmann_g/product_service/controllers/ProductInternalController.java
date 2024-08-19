@@ -3,7 +3,6 @@ package com.hoffmann_g.product_service.controllers;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,19 +21,14 @@ import com.hoffmann_g.product_service.serivces.ProductService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("api/product")
-public class ProductController {
+@RequestMapping("api/internal/product")
+public class ProductInternalController {
 
-    @Autowired
-    private ProductService productService;
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ProductResponse createProduct(@Valid @RequestBody ProductRequest request){
-        return productService.createProduct(request);
-    }
+    private final ProductService productService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -46,6 +40,12 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     public ProductResponse getProduct(@PathVariable Long id){
         return productService.getProductById(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductResponse createProduct(@Valid @RequestBody ProductRequest request){
+        return productService.createProduct(request);
     }
 
     @PutMapping("/{id}")

@@ -25,8 +25,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
 @RestController
-@RequestMapping("/api/stock")
-public class StockController {
+@RequestMapping("/api/internal/stock")
+public class StockInternalController {
 
     @Autowired
     private StockService stockService;

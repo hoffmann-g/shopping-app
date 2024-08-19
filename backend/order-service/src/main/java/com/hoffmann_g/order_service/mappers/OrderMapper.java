@@ -7,20 +7,12 @@ import java.util.Map.Entry;
 import org.springframework.stereotype.Component;
 
 import com.hoffmann_g.order_service.dtos.OrderItemResponse;
-import com.hoffmann_g.order_service.dtos.OrderRequest;
 import com.hoffmann_g.order_service.dtos.OrderResponse;
 import com.hoffmann_g.order_service.entities.Order;
 import com.hoffmann_g.order_service.entities.OrderItem;
 
 @Component
 public class OrderMapper {
-
-    public Order mapToOrder(OrderRequest request){
-        return Order.builder()
-                    .customerId(request.customerId())
-                    .paymentType(request.paymentType())
-                    .build();
-    }
 
     public OrderResponse mapToOrderResponse(Order order){
         return OrderResponse.builder()
