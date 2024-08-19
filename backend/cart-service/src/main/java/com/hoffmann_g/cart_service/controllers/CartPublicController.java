@@ -17,6 +17,7 @@ import com.hoffmann_g.cart_service.dtos.CartItemRequest;
 import com.hoffmann_g.cart_service.dtos.CartResponse;
 import com.hoffmann_g.cart_service.services.CartService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +31,7 @@ public class CartPublicController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public CartResponse getCart(@RequestHeader("Authorization") String encodedToken) {
         return cartService.getCart(securityService.getUserId(encodedToken));
     }
@@ -42,20 +44,35 @@ public class CartPublicController {
 
     @PostMapping("/items")
     @ResponseStatus(HttpStatus.CREATED)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public CartResponse addItemToCart(@RequestHeader("Authorization") String encodedToken, @Valid @RequestBody CartItemRequest request) {
         return cartService.addItemToCart(securityService.getUserId(encodedToken), request);
     }
 
     @PutMapping("/items")
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public CartResponse updateCartItem(@RequestHeader("Authorization") String encodedToken, @Valid @RequestBody CartItemRequest request) {
         return cartService.updateCartItem(securityService.getUserId(encodedToken), request);
     }
 
     @PostMapping("/coupons")
     @ResponseStatus(HttpStatus.CREATED)
+    @CircuitBreaker(name = "config", fallbackMethod = "fallbackMethod")
     public CartResponse applyCoupon(@RequestHeader("Authorization") String encodedToken, @RequestParam String code) {
         return cartService.applyCoupon(securityService.getUserId(encodedToken), code);
+    }
+
+    public String fallbackMethod(String encodedToken, Throwable throwable) {
+        return "Oops! Something went wrong";
+    }
+
+    public String fallbackMethod(String encodedToken, String code, Throwable throwable) {
+        return "Oops! Something went wrong";
+    }
+
+    public String fallbackMethod(String encodedToken, CartItemRequest request, Throwable throwable) {
+        return "Oops! Something went wrong";
     }
     
 }

@@ -11,6 +11,7 @@ import com.hoffmann_g.customer_service.config.SecurityService;
 import com.hoffmann_g.customer_service.dtos.UserResponse;
 import com.hoffmann_g.customer_service.services.UserService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -23,8 +24,13 @@ public class UserPublicController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "security", fallbackMethod = "fallbackMethod")
     public UserResponse findUserByEmail(@RequestHeader("Authorization") String encodedToken){
         return userService.findByEmail(securityService.getUserEmail(encodedToken));
+    }
+
+    public String fallbackMethod(String encodedToken, Throwable throwable) {
+        return "Oops! Something went wrong";
     }
     
 }
