@@ -12,6 +12,7 @@ import com.hoffmann_g.security_service.dtos.UserLoginRequest;
 import com.hoffmann_g.security_service.dtos.UserRegisterRequest;
 import com.hoffmann_g.security_service.services.AuthenticationService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 
 @RequestMapping("/api/security")
@@ -32,8 +33,13 @@ public class AuthenticationPublicController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.OK)
+    @CircuitBreaker(name = "customer", fallbackMethod = "fallbackMethod")
     public String register(@Valid @RequestBody UserRegisterRequest request) {
         return authenticationService.register(request);
+    }
+
+    public String fallbackMethod(UserRegisterRequest request, Throwable throwable) {
+        return "Oops! Something went wrong";
     }
 
 }
