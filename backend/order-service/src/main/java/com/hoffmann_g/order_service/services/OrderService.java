@@ -1,11 +1,14 @@
 package com.hoffmann_g.order_service.services;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +24,14 @@ import com.hoffmann_g.order_service.dtos.OrderResponse;
 import com.hoffmann_g.order_service.entities.Order;
 import com.hoffmann_g.order_service.entities.OrderItem;
 import com.hoffmann_g.order_service.entities.enums.OrderStatus;
+import com.hoffmann_g.order_service.events.OrderPlacedEvent;
 import com.hoffmann_g.order_service.mappers.OrderMapper;
 import com.hoffmann_g.order_service.repositories.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -34,48 +40,40 @@ public class OrderService {
     private final CouponService couponService;
     private final StockService stockService;
     private final CartService cartService;
+
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
 
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
+
     @Transactional
     public OrderResponse placeOrder(Long userId, String userEmail, OrderRequest request) {
-        // get cart items and quantities
         Map<Long, Integer> productQuantities = cartService.getCartQuantities(userId);
 
-        if (productQuantities.size() < 1) throw new EmptyCartException("Cannot place order from an empty cart"); 
+        if (productQuantities.size() < 1)
+            throw new EmptyCartException("Cannot place order from an empty cart");
 
-        // get list of available products in stock
         List<Long> availableProducts = stockService.isCartInStock(orderMapper.mapToStringMap(productQuantities));
 
-        // check for items that are out of stock
         for (Long productId : productQuantities.keySet()) {
             if (!availableProducts.contains(productId)) {
                 throw new ItemOutOfStockException("Item " + productId + " is out of stock");
             }
         }
 
-        // get product prices
         Map<Long, Long> prices = productService.getPrices(availableProducts);
-
-        // calculate total price of the order
         Long totalPrice = calculateTotalPrice(prices, productQuantities);
-
-        // get coupon if it exists
         String coupon = cartService.getCartCoupon(userId);
 
-        // if coupon exists, recalculates price
         if (coupon != null) {
             Integer discountPercentage = couponService.getCouponDiscount(coupon);
             totalPrice -= (totalPrice * discountPercentage) / 100;
         }
 
-        // get shipment cost for the items
         Long shipmentCost = 0L;
-
-        // get order items
+        totalPrice += shipmentCost;
         List<OrderItem> orderItems = createOrderItems(productQuantities, prices);
 
-        // create order
         Order order = new Order(
                 null,
                 userId,
@@ -86,41 +84,52 @@ public class OrderService {
                 LocalDateTime.now(),
                 orderItems);
 
-        // reserve stock
         stockService.reserveStock(orderMapper.mapToStringMap(productQuantities));
-
-        // save the order to the database
         order = orderRepository.save(order);
-
-        // clear cart
         cartService.clearCart(userId);
 
-        // send message to payment service to process payment passing the payment info
-        // --- credit/debit card: card number, cvv, name, etc, amount
-        // --- pix: name, amount 
-
-        // send email to user saying that a purchase was made
+        kafkaTemplate.send("paymentRequestTopic",
+                new OrderPlacedEvent(null, userEmail, request.paymentType(), totalPrice));
 
         return orderMapper.mapToOrderResponse(order);
     }
 
     @Transactional
-    public OrderResponse updateOrder(Order request) {
-        // watch for the payment server event response
+    @KafkaListener(topics = "paymentStatusTopic")
+    public void updateOrder(Map<Long, String> orderResponse) {
+        Long orderId = -1L;
+        String status = "";
 
-        // if confirmed, set status to "CONFIRMED"
+        for (Entry<Long, String> entry : orderResponse.entrySet()) {
+            orderId = entry.getKey();
+            status = entry.getValue().toLowerCase();
+            break;
+        }
 
-        // remove reserved items from stock
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Could not get order."));
 
-        // send email to user saying that purchase was confirmed
+        Map<Long, Integer> orderedItemsMap = new HashMap<>();
 
-        // if cancelled, set status to "cancelled"
+        for (OrderItem i : order.getOrderItemList()) {
+            orderedItemsMap.put(i.getProductId(), i.getQuantity());
+        }
 
-        // remove reserved items from stock
+        if (status == "approved") {
+            order.setOrderStatus(OrderStatus.valueOf(status));
+            stockService.decreaseReservedStock(orderMapper.mapToStringMap(orderedItemsMap));
+            log.info("PAYMENT APPROVED");
+            log.debug("PAYMENT APPROVED");
+        }
 
-        // send email to user saying that purchase was confirmed
-        
-        return null;
+        if (status != "approved") {
+            order.setOrderStatus(OrderStatus.valueOf(status));
+            stockService.unreserveStock(orderMapper.mapToStringMap(orderedItemsMap));
+            log.info("PAYMENT NOT APPROVED");
+            log.debug("PAYMENT NOT APPROVED");
+        }
+
+        orderRepository.save(order);
     }
 
     public OrderResponse getOrderById(Long id) {
@@ -136,10 +145,14 @@ public class OrderService {
         return orders.stream().map(x -> orderMapper.mapToOrderResponse(x)).toList();
     }
 
+    public List<OrderResponse> getOrdersByUser(Long id) {
+        return orderRepository.findByCustomerId(id).stream().map(orderMapper::mapToOrderResponse).toList();
+    }
+
     private Long calculateTotalPrice(Map<Long, Long> prices, Map<Long, Integer> quantities) {
         Long totalAmount = 0L;
 
-        for (Entry<Long, Long> entry : prices.entrySet()){
+        for (Entry<Long, Long> entry : prices.entrySet()) {
             totalAmount += entry.getValue() * quantities.get(entry.getKey());
         }
 
@@ -155,10 +168,6 @@ public class OrderService {
                         prices.get(entry.getKey()),
                         null))
                 .collect(Collectors.toList());
-    }
-
-    public List<OrderResponse> getOrdersByUser(Long id) {
-        return orderRepository.findByCustomerId(id).stream().map(orderMapper::mapToOrderResponse).toList();
     }
 
 }
