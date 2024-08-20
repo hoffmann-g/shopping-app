@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum OrderStatus {
     PENDING("pending"),
     CONFIRMED("confirmed"),
-    CANCELLED("cancelled");
+    CANCELLED("cancelled"),
+    DECLINED("declined");
 
     private String type;
 
