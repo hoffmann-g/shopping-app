@@ -7,7 +7,6 @@ import java.util.List;
 import com.hoffmann_g.order_service.entities.enums.OrderStatus;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,7 +33,6 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
     private Long customerId;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

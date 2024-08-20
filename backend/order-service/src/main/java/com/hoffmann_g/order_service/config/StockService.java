@@ -17,5 +17,10 @@ public interface StockService {
     @RequestMapping(method = RequestMethod.PUT, value = "api/internal/stock/reserve")
     public void reserveStock(@RequestParam Map<String, String> stockItems);
 
-    
+    @RequestMapping(method = RequestMethod.PUT, value = "api/internal/stock/update")
+    public void decreaseReservedStock(@RequestParam Map<String, String> stockItems);
+
+    @RequestMapping(method = RequestMethod.PUT, value = "api/internal/stock/unreserve")
+    public void unreserveStock(@RequestParam Map<String, String> stockItems);
+
 }
