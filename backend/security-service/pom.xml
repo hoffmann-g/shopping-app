@@ -112,6 +112,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<finalName>security-service</finalName>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
