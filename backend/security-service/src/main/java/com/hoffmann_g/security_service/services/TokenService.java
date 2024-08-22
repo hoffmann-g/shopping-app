@@ -11,7 +11,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.hoffmann_g.security_service.controllers.exceptions.AlgorithmGenerationException;
-import com.hoffmann_g.security_service.controllers.exceptions.ResourceNotFoundException;
+import com.hoffmann_g.security_service.controllers.exceptions.InvalidTokenException;
 import com.hoffmann_g.security_service.entities.UserLogin;
 
 @Service
@@ -42,30 +42,34 @@ public class TokenService {
 
     @Transactional(readOnly = true)
     public Long validateTokenId(String token){
-        String email = JWT.require(tokenAlgorithm)
-                          .withIssuer("security-service")
-                          .build()
-                          .verify(token.replace("Bearer ", ""))
-                          .getSubject();
+        try {
+            String email = JWT.require(tokenAlgorithm)
+                            .withIssuer("security-service")
+                            .build()
+                            .verify(token.replace("Bearer ", ""))
+                            .getSubject();
 
-        UserLogin userLogin = userLoginService.findByEmail(email).orElseThrow(()
-            -> new ResourceNotFoundException("Could not find user"));
-
-        return userLogin.getCustomerId();
+            UserLogin userLogin = userLoginService.findByEmail(email).get();
+            return userLogin.getCustomerId();
+        } catch (Exception e){
+            throw new InvalidTokenException("Could not decode login token: " + e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)
     public String validateTokenEmail(String token){
-        String email = JWT.require(tokenAlgorithm)
+        try {
+            String email = JWT.require(tokenAlgorithm)
                           .withIssuer("security-service")
                           .build()
                           .verify(token.replace("Bearer ", ""))
                           .getSubject();
 
-        UserLogin userLogin = userLoginService.findByEmail(email).orElseThrow(()
-            -> new ResourceNotFoundException("Could not find user"));
-
-        return userLogin.getEmail();
+            UserLogin userLogin = userLoginService.findByEmail(email).get();
+            return userLogin.getEmail();
+        } catch (Exception e){
+            throw new InvalidTokenException("Could not decode login token: " + e.getMessage());
+        }   
     }
 
     private Instant generateExpirationDate(Long minutes) {
