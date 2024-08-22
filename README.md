@@ -25,7 +25,7 @@ The application follows a microservices architecture, where each service is resp
 - **Security Service:** Manages user authentication and token validation.
 - **Stock Service:** Oversees product stock management.
 
-<img src="https://github.com/user-attachments/assets/64f24408-180e-47c9-9fc1-7d22abb4f575" width="750">
+<img src="https://i.imgur.com/gm3Of5x.jpeg" width="750">
 
 Each service REST API is divided into public and private controllers where the public are for user acccess, and private for inter-service communication requirements.
 
