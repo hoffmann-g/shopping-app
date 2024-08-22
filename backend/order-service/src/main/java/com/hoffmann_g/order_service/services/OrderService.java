@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,7 +94,7 @@ public class OrderService {
     }
 
     @Transactional
-    @KafkaListener(topics = "paymentStatusTopic")
+    // @KafkaListener(topics = "paymentStatusTopic")
     public void updateOrder(Map<Long, String> orderResponse) {
         Long orderId = -1L;
         String status = "";
