@@ -20,6 +20,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - discovery-server
+      - security-service
     environment:
       server.port: 8060
       eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
@@ -153,7 +154,6 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - discovery-server
-      - api-gateway
       - mysql
     environment:
       server.port: 8067

@@ -47,6 +47,14 @@ public class ExceptionHandlers {
 		return ResponseEntity.status(status).body(err);
     }
 
+	@ExceptionHandler(InvalidTokenException.class)
+	public ResponseEntity<StandardError> database(InvalidTokenException e, HttpServletRequest request) {
+		String error = e.getClass().getSimpleName();
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
+		return ResponseEntity.status(status).body(err);
+    }
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<StandardError> database(MethodArgumentNotValidException e, HttpServletRequest request) {
 		

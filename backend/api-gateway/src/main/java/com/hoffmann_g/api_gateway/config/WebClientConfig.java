@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.hoffmann_g.api_gateway.exceptions.exceptions.GlobalExceptionHandler;
+
 import io.netty.resolver.DefaultAddressResolverGroup;
 import reactor.netty.http.client.HttpClient;
 
@@ -25,5 +27,9 @@ public class WebClientConfig {
         return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient));
     }
 
+    @Bean
+    public GlobalExceptionHandler globalExceptionHandler() {
+        return new GlobalExceptionHandler();
+    }
     
 }
