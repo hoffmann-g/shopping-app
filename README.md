@@ -1,5 +1,5 @@
 # Microservices-based Store App
-[![NPM](https://img.shields.io/npm/l/react)](https://github.com/hoffmann-g/shopping-app/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/github/license/hoffmann-g/shopping-app)](https://github.com/hoffmann-g/shopping-app/blob/main/LICENSE)
 
 # About
 This project is a microservices-architected store app developed with a REST API developed using Spring Boot. It is designed to provide a comprehensive shopping experience where customers can:
@@ -47,12 +47,20 @@ Each service REST API is divided into public and private controllers where the p
 - Docker
 
 # How to Run
-To run this project locally, ensure that you have Docker installed. Clone the repository, go to the 'backend' folder and run the following command:
+To run this project locally, ensure that you have Docker installed. Clone the repository, go to the 'backend' folder, create a `.env` file from `.env.example` and set the credentials:
+
+```
+cp .env.example .env
+```
+
+Then run the following command:
 
 ```
 # inicialize project in containers
 docker compose up
 ```
+
+The services read their credentials from environment variables (`MONGO_USERNAME`, `MONGO_PASSWORD`, `MYSQL_PASSWORD`, `JWT_SECRET`). The `.env` file is ignored by git.
 (The gateway is located in the port 8060 by default)
 
 # Contributing
