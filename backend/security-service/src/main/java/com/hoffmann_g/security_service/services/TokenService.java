@@ -21,7 +21,7 @@ public class TokenService {
     private final Algorithm tokenAlgorithm;
 
     public TokenService(UserLoginService userLoginService,
-                        @Value("${token.generation.secret") String secret) { 
+                        @Value("${token.generation.secret}") String secret) { 
         this.userLoginService = userLoginService;
         this.tokenAlgorithm = Algorithm.HMAC256(secret);
     
